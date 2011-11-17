@@ -1,30 +1,13 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date:    17:54:03 11/16/2011 
-// Design Name: 
-// Module Name:    robsmult 
-// Project Name: 
-// Target Devices: 
-// Tool versions: 
-// Description: 
-//
-// Dependencies: 
-//
-// Revision: 
-// Revision 0.01 - File Created
-// Additional Comments: 
-//
-//////////////////////////////////////////////////////////////////////////////////
+// Implementation of Robertson's multiplier using a FSM control unit and 
+// datapath to meet the requirements outlined in toprobertsons.v.
 module robsmult(
     input clk,
     input reset,
     input [7:0] multiplier,
     input [7:0] multiplicand,
-    output [15:0] product,
-	 output done
+    output [15:0] product, // multiplier * multiplicand 
+	output done // signal that product is ready
     );
 	 
 	// control signals
@@ -43,6 +26,8 @@ module robsmult(
 	
 endmodule
 
+// this control unit implements the FSM required to control the datapath
+// needed by a Robertson's multiplier described in toprobertsons.v.
 module control_unit(
 	input clk, reset,
 	input zq, zy, zr,
@@ -57,21 +42,21 @@ module control_unit(
 	parameter   S3   	= 5'b00011;	// State 03
 	parameter   S4   	= 5'b00100;	// State 04
 	parameter   S5   	= 5'b00101;	// State 05
-	parameter   S6 	= 5'b00110;	// State 06
-	parameter   S7 	= 5'b00111;	// State 07
+	parameter   S6 	    = 5'b00110;	// State 06
+	parameter   S7 	    = 5'b00111;	// State 07
 	parameter   S8   	= 5'b01000;	// State 08
-	parameter   S9 	= 5'b01001;	// State 09
-	parameter   S10	= 5'b01010;	// state 0a
-	parameter   S11   = 5'b01011;	// State 0b
+	parameter   S9 	    = 5'b01001;	// State 09
+	parameter   S10	    = 5'b01010;	// state 0a
+	parameter   S11     = 5'b01011;	// State 0b
 	parameter   S12 	= 5'b01100; // State 0c
 	parameter   S13 	= 5'b01101; // State 0d
 	parameter   S14 	= 5'b01110;	// State 0e
 	parameter   S15  	= 5'b01111;	// State 0f
 	parameter   S16  	= 5'b10000;	// State 10
 	parameter   S17  	= 5'b10001;	// State 11
-	parameter   S18	= 5'b10010;	// State 12
-	parameter   S19	= 5'b10011;	// State 13
-	parameter   S20	= 5'b10100;	// State 14
+	parameter   S18	    = 5'b10010;	// State 12
+	parameter   S19	    = 5'b10011;	// State 13
+	parameter   S20	    = 5'b10100;	// State 14
 
 	reg [4:0]  state, nextstate;
 	reg [14:0] controls;	
@@ -142,7 +127,7 @@ module control_unit(
 		S7:        	controls <= 15'b001_0000_0000_0000;
 		S8:   		controls <= 15'b000_0000_0000_0000;
 		S9:         controls <= 15'b001_1000_0000_0000;
-		S10:    		controls <= 15'b010_0011_0101_0000;
+		S10:    	controls <= 15'b010_0011_0101_0000;
 		S11:  		controls <= 15'b000_0000_0000_0000;
 		S12:        controls <= 15'b000_0000_0000_0000;   
 		S13:       	controls <= 15'b000_0001_0010_0000;
@@ -158,6 +143,8 @@ module control_unit(
 	 
 endmodule
 
+// this datapath implements hardware required to perform signed
+// Robertson's multiplication described in toprobertsons.v.
 module datapath(
 	input clk, reset,
 	input [7:0] multiplier, multiplicand,
@@ -185,25 +172,9 @@ module datapath(
 	
 	counter_down decrement8(clk, c1, c13, q);
 	
-	// fields to controller
+	// External: signals to control unit and outbus
 	assign product = {a,x};
 	assign zr = ~r[0];
 	assign zq = ~q[0] & ~q[1] & ~q[2]; // zq = 1 when q = 0 (3'b000) from 7 (3'b111)
 	
-endmodule
-
-module mux2 #(parameter WIDTH = 8)
-             (input  [WIDTH-1:0] d0, d1, 
-              input              s, 
-              output [WIDTH-1:0] y);
-
-  assign y = s ? d1 : d0; 
-endmodule
-
-module mux3 #(parameter WIDTH = 8)
-             (input  [WIDTH-1:0] d0, d1, d2,
-              input  [1:0]       s, 
-              output [WIDTH-1:0] y);
-
-  assign #1 y = s[1] ? d2 : (s[0] ? d1 : d0); 
 endmodule
