@@ -1,5 +1,20 @@
 `timescale 1ns / 1ps
 
+
+	// Outputs
+	wire [15:0] product;
+	wire done;
+    
+    // keep track of execution status
+    reg  [31:0] cycle;
+    
+    // expected results
+	reg [15:0] expected_product;
+
+	// Instantiate the Unit Under Test (UUT)
+	toprobertsons uut (
+		.clk(clk), 
+		.reset(reset), 
 ////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer:
@@ -29,21 +44,6 @@ module robertsonstest;
 	reg reset;
 	reg [7:0] multiplier;
 	reg [7:0] multiplicand;
-
-	// Outputs
-	wire [15:0] product;
-	wire done;
-    
-    // keep track of execution status
-    reg  [31:0] cycle;
-    
-    // expected results
-	reg [15:0] expected_product;
-
-	// Instantiate the Unit Under Test (UUT)
-	toprobertsons uut (
-		.clk(clk), 
-		.reset(reset), 
 		.multiplier(multiplier), 
 		.multiplicand(multiplicand), 
 		.product(product),
@@ -82,17 +82,17 @@ module robertsonstest;
 		//multiplicand = 6;
 		//expected_product = -30;
         // 3.2 Positive Multiplicand and Negative Multiplier
-		multiplier = -7;
-		multiplicand = 8;
-		expected_product = -56;
+		//multiplier = -7;
+		//multiplicand = 8;
+		//expected_product = -56;
 		// 4.1 Negative Multiplicand and Negative Multiplier
-		multiplier = -5;
-		multiplicand = -6;
-		expected_product = 30;
+		//multiplier = -5;
+		//multiplicand = -6;
+		//expected_product = 30;
         // 4.2 Negative Multiplicand and Negative Multiplier
-		multiplier = -9;
-		multiplicand = -4;
-		expected_product = 36;
+		//multiplier = -9;
+		//multiplicand = -4;
+		//expected_product = 36;
 	end
       
     // generate clock to sequence tests
