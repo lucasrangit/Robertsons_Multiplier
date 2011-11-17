@@ -1,3 +1,4 @@
+// 8-bit Adder/Subtractor (active low subtract)
 module addsub
 (
 	input [7:0] dataa,

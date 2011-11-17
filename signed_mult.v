@@ -1,3 +1,4 @@
+// Altera signed multiplication. Used to test the testbench.
 module signed_mult (out, clk, a, b);
 
 	output 		[15:0]	out;

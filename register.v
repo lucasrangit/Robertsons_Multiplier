@@ -1,23 +1,4 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date:    20:07:36 11/16/2011 
-// Design Name: 
-// Module Name:    register 
-// Project Name: 
-// Target Devices: 
-// Tool versions: 
-// Description: 
-//
-// Dependencies: 
-//
-// Revision: 
-// Revision 0.01 - File Created
-// Additional Comments: 
-//
-//////////////////////////////////////////////////////////////////////////////////
+// Asynchronous load and store register
 module register # (parameter N = 8)
 	(input clk,
 	 input [N-1:0] in,
@@ -33,6 +14,8 @@ module register # (parameter N = 8)
 
 endmodule
 
+// Asynchronous load and store register with signals to control 
+// high and low bits seperately or at the same time
 module register_hl # (parameter N = 16)
 	(input clk,
 	 input [N/2-1:0] inh,
@@ -49,6 +32,5 @@ module register_hl # (parameter N = 16)
 			if (loadh)	out[N-1:N/2] <= inh;
 			if (loadl)	out[N/2-1:0] <= inl;
 		end
-
 	
 endmodule

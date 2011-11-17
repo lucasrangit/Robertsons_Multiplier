@@ -1,3 +1,4 @@
+// Counter that decrements from 7 to 0 at every positive clock edge.
 module counter_down
 (
 	clk,
