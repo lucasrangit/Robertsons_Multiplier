@@ -1,20 +1,4 @@
 `timescale 1ns / 1ps
-
-
-	// Outputs
-	wire [15:0] product;
-	wire done;
-    
-    // keep track of execution status
-    reg  [31:0] cycle;
-    
-    // expected results
-	reg [15:0] expected_product;
-
-	// Instantiate the Unit Under Test (UUT)
-	toprobertsons uut (
-		.clk(clk), 
-		.reset(reset), 
 ////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer:
@@ -44,12 +28,27 @@ module robertsonstest;
 	reg reset;
 	reg [7:0] multiplier;
 	reg [7:0] multiplicand;
+
+	// Outputs
+	wire [15:0] product;
+	wire done;
+    
+    // keep track of execution status
+    reg  [31:0] cycle;
+    
+    // expected results
+	reg [15:0] expected_product;
+
+	// Instantiate the Unit Under Test (UUT)
+	toprobertsons uut (
+		.clk(clk), 
+		.reset(reset), 
 		.multiplier(multiplier), 
 		.multiplicand(multiplicand), 
 		.product(product),
 		.done(done)
 	);
-
+        
 	initial begin
 		// Initialize Inputs
 		clk = 0;
