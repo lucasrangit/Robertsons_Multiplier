@@ -50,13 +50,10 @@ module control_unit(
 	parameter   S11     = 5'b01011;	// State 0b
 	parameter   S12 	= 5'b01100; // State 0c
 	parameter   S13 	= 5'b01101; // State 0d
-	parameter   S14 	= 5'b01110;	// State 0e
-	parameter   S15  	= 5'b01111;	// State 0f
-	parameter   S16  	= 5'b10000;	// State 10
-	parameter   S17  	= 5'b10001;	// State 11
-	parameter   S18	    = 5'b10010;	// State 12
-	parameter   S19	    = 5'b10011;	// State 13
-	parameter   S20	    = 5'b10100;	// State 14
+	parameter   S14  	= 5'b01111;	// State 0f
+	parameter   S15	    = 5'b10010;	// State 12
+	parameter   S16	    = 5'b10011;	// State 13
+	parameter   S17	    = 5'b10100;	// State 14
 
 	reg [4:0]  state, nextstate;
 	reg [14:0] controls;	
@@ -99,17 +96,10 @@ module control_unit(
 					  default: nextstate <= S0; // should never happen
 					endcase
 		S13:  nextstate <= S14;
-		S14:  case(zy)
-					  0:      nextstate <= S15;
-					  1:      nextstate <= S17;
-					  default: nextstate <= S0; // should never happen
-					endcase
+		S14:  nextstate <= S15;
 		S15:  nextstate <= S16;
-		S16:  nextstate <= S18;
-		S17:  nextstate <= S18;
-		S18:  nextstate <= S19;
-		S19:  nextstate <= S20;
-		S20:  begin nextstate <= S20; done <= 1; end
+		S16:  nextstate <= S17;
+		S17:  begin nextstate <= S17; done <= 1; end
 	 endcase
 	 
 	// output logic
@@ -131,13 +121,10 @@ module control_unit(
 		S11:  		controls <= 15'b000_0000_0000_0000;
 		S12:        controls <= 15'b000_0000_0000_0000;   
 		S13:       	controls <= 15'b000_0001_0010_0000;
-		S14:        controls <= 15'b000_0000_0000_0000;
-		S15:        controls <= 15'b001_0000_0000_0000;
-		S16:        controls <= 15'b000_0000_0000_0000;
-		S17:        controls <= 15'b001_0000_0000_0000;
-		S18:        controls <= 15'b000_0011_0101_0000;
-		S19:        controls <= 15'b100_0000_1000_1000;	
-		S20:        controls <= 15'b000_0000_0000_0000;	
+		S14:        controls <= 15'b001_0000_0000_0000;
+		S15:        controls <= 15'b000_0011_0101_0000;
+		S16:        controls <= 15'b100_0000_1000_1000;	
+		S17:        controls <= 15'b000_0000_0000_0000;	
 		default:    controls <= 15'b000_0000_0000_0000; // should never happen
 	 endcase
 	 
