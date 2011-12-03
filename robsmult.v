@@ -1,12 +1,13 @@
 `timescale 1ns / 1ps
 // Implementation of Robertson's multiplier using a FSM control unit and 
 // datapath to meet the requirements outlined in toprobertsons.v.
-module robsmult(
+module robsmult #(parameter WIDTH = 8)
+    (
     input clk,
     input reset,
-    input [7:0] multiplier,
-    input [7:0] multiplicand,
-    output [15:0] product, // multiplier * multiplicand 
+    input [WIDTH-1:0] multiplier,
+    input [WIDTH-1:0] multiplicand,
+    output [WIDTH*2-1:0] product, // multiplier * multiplicand 
 	output done // signal that product is ready
     );
 	 
@@ -22,7 +23,7 @@ module robsmult(
 	// instantiate datapath
 	datapath dp(clk, reset, multiplier, multiplicand, c0, c1, c2, c3, c9, c10, c5, c8, c12, c14, c13, c4, c6, c7, c11, product, zq, zr);
 	
-	assign zy = ~multiplicand[7];
+	assign zy = ~multiplicand[WIDTH-1];
 	
 endmodule
 
@@ -132,30 +133,31 @@ endmodule
 
 // this datapath implements hardware required to perform signed
 // Robertson's multiplication described in toprobertsons.v.
-module datapath(
+module datapath #(parameter WIDTH = 8)
+    (
 	input clk, reset,
-	input [7:0] multiplier, multiplicand,
+	input [WIDTH-1:0] multiplier, multiplicand,
 	input c0, c1, c2, c3, c9, c10, c5, c8, c12, c14, c13, c4, c6, c7, c11,
-	output [15:0] product,
+	output [WIDTH*2-1:0] product,
 	output zq, zr
 	);
 	
 	// Internal signals of the datapath module
-	wire [7:0] y, a, in_x, x, in_rh, in_rl, alu_out, q;
-	wire [15:0] r, sr;
+	wire [WIDTH-1:0] y, a, in_x, x, in_rh, in_rl, alu_out, q;
+	wire [WIDTH*2-1:0] r, sr;
 	
 	register reg_y(clk, multiplicand, y, c0, 1'b0);
-	register reg_a(clk, r[15:8], a, c14, c2);
+	register reg_a(clk, r[WIDTH*2-1:WIDTH], a, c14, c2);
 	register reg_x(clk, in_x, x, c3, 1'b0);
 	register_hl reg_r(clk, in_rh, in_rl, c8, c9, 1'b0, r);
 	
 	right_shift_register sign_ext(clk, c12, r, c11, sr); 
 	
-	mux2 #(8) mux_x(multiplier, r[7:0], c7, in_x);
-	mux3 #(8) mux_rh(a, sr[15:8], alu_out, {c5,c4}, in_rh);
-	mux2 #(8) mux_rl(x, sr[7:0], c6, in_rl);
+	mux2 #(8) mux_x(multiplier, r[WIDTH-1:0], c7, in_x);
+	mux3 #(8) mux_rh(a, sr[WIDTH*2-1:WIDTH], alu_out, {c5,c4}, in_rh);
+	mux2 #(8) mux_rl(x, sr[WIDTH-1:0], c6, in_rl);
 	
-	addsub addsub(r[15:8], y, c10, clk, alu_out);
+	addsub addsub(r[WIDTH*2-1:WIDTH], y, c10, clk, alu_out);
 	
 	counter_down decrement8(clk, c1, c13, q);
 	
