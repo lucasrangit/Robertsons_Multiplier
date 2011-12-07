@@ -53,3 +53,61 @@ module upcreg(
 
 endmodule     
       
+// 5:1 MULTIPLEXER
+module mux5 (input      d0, d1, d2, d3, d4,
+              input      [2:0]       s, 
+              output reg  y);
+
+   always @( * )
+      case(s)
+         3'b000: y <= d0;
+         3'b001: y <= d1;
+         3'b010: y <= d2;
+         3'b011: y <= d3;
+         3'b100: y <= d4;
+         default: y <= 1'b0;
+      endcase
+endmodule
+
+// 8-bit Adder/Subtractor (active low subtract)
+module addsub
+(
+	input [7:0] dataa,
+	input [7:0] datab,
+	input add_sub,	  // if this is 1, add; else subtract
+	input clk,
+	output reg [7:0] result
+);
+
+	always @ (*)
+	begin
+		if (add_sub)
+			result <= dataa + datab;
+		else
+			result <= dataa - datab;
+	end
+
+endmodule
+
+// Counter that decrements from WIDTH to 0 at every positive clock edge.
+module counter_down
+(
+	clk,
+	reset,
+	ena,
+	result
+);
+
+	input clk;
+	input reset;
+	input ena;
+	output reg [7:0] result;
+
+	always @(posedge clk or posedge reset)
+	begin
+		if (reset) 
+			result = 7;		
+		else if (ena) 
+			result = result - 1;
+	end
+endmodule		
