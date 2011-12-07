@@ -18,18 +18,84 @@ module robsmult #(parameter WIDTH = 8)
 	wire zq, zy, zr;
 
 	// instantiate control unit
-	control_unit cu(clk, reset, zq, zy, zr, c0, c1, c2, c3, c9, c10, c5, c8, c12, c14, c13, c4, c6, c7, c11, done);
-	
+    robs_control_unit_micro cu(clk, reset, zq, zy, zr, c0, c1, c2, c3, c9, c10, c5, c8, c12, c14, c13, c4, c6, c7, c11, done);	
+    //robs_control_unit_fsmcu(clk, reset, zq, zy, zr, c0, c1, c2, c3, c9, c10, c5, c8, c12, c14, c13, c4, c6, c7, c11, done);
+    
 	// instantiate datapath
-	datapath dp(clk, reset, multiplier, multiplicand, c0, c1, c2, c3, c9, c10, c5, c8, c12, c14, c13, c4, c6, c7, c11, product, zq, zr);
+	robs_datapath dp(clk, reset, multiplier, multiplicand, c0, c1, c2, c3, c9, c10, c5, c8, c12, c14, c13, c4, c6, c7, c11, product, zq, zr);
 	
 	assign zy = ~multiplicand[WIDTH-1];
 	
 endmodule
 
+// this control unit implements the microcode required to control the datapath
+// needed by a Robertson's multiplier described in toprobertsons.v.
+module robs_control_unit_micro(
+	input clk, reset,
+	input zq, zy, zr,
+	output c0, c1, c2, c3, c9, c10, c5, c8, c12, c14, c13, c4, c6, c7, c11,
+	output reg done
+	);
+	
+    wire load_incr;
+    wire [4:0] upc;
+    wire [22:0] uinstr;
+	
+    // micro-PC
+    upcreg upc_reg(clk, reset, load_incr, uinstr[19:15], upc);
+    
+    // condition select mux
+    mux5 cs_mux(1'b0, zq, zr, zy, 1'b1, uinstr[22:20], load_incr);
+    
+    // control memory
+    rom control_memory(upc, uinstr);
+    
+	// output logic
+	assign {c14, c13, c12, c11, c10, c9, c8, c7, c6, c5, c4, c3, c2, c1, c0} = uinstr[14:0];
+    
+    always @(*)
+        if (upc == 17)
+            done <= 1;
+    
+endmodule
+
+// Control Memory (Read-only)
+module rom(
+    input [4:0] addr, 
+    output [22:0] data);
+    
+    reg  [22:0] mem[17:0];
+    
+    initial
+        begin
+            // Microcode ROM preloaded with Roberston's multiplication algorithm
+            mem[00] = 23'b00000001000000000000011;
+            mem[01] = 23'b00000010000000000001100;
+            mem[02] = 23'b00000011000001100000000;
+            mem[03] = 23'b00101100000000000000000;
+            mem[04] = 23'b01000110000000000000000;
+            mem[05] = 23'b00000110000010100100000;
+            mem[06] = 23'b01101001000000000000000;
+            mem[07] = 23'b00001000001000000000000;
+            mem[08] = 23'b10001010000000000000000;
+            mem[09] = 23'b00001010001100000000000;
+            mem[10] = 23'b00001011010001101010000;
+            mem[11] = 23'b10000011000000000000000;
+            mem[12] = 23'b01001110000000000000000;
+            mem[13] = 23'b00001110000000100100000;
+            mem[14] = 23'b00001111001000000000000;
+            mem[15] = 23'b00010000000001101010000;
+            mem[16] = 23'b00010001100000010001000;
+            mem[17] = 23'b10010001000000000000000;
+        end
+
+    assign data = mem[addr];
+
+endmodule
+
 // this control unit implements the FSM required to control the datapath
 // needed by a Robertson's multiplier described in toprobertsons.v.
-module control_unit(
+module robs_control_unit_fsm(
 	input clk, reset,
 	input zq, zy, zr,
 	output c0, c1, c2, c3, c9, c10, c5, c8, c12, c14, c13, c4, c6, c7, c11,
@@ -108,7 +174,7 @@ module control_unit(
 	 
 	always @( * )
 	 case(state)
-	   S0:        	controls <= 15'b000_0000_0000_0011;
+        S0:        	controls <= 15'b000_0000_0000_0011;
 		S1:       	controls <= 15'b000_0000_0000_1100;
 		S2:         controls <= 15'b000_0011_0000_0000;
 		S3:         controls <= 15'b000_0000_0000_0000;
@@ -133,7 +199,7 @@ endmodule
 
 // this datapath implements hardware required to perform signed
 // Robertson's multiplication described in toprobertsons.v.
-module datapath #(parameter WIDTH = 8)
+module robs_datapath #(parameter WIDTH = 8)
     (
 	input clk, reset,
 	input [WIDTH-1:0] multiplier, multiplicand,
